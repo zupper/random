@@ -90,7 +90,7 @@ if len(sys.argv) < 2:
 # params handling
 tourney_mode = sys.argv[1] == 'tourney'
 access_token = get_access_token()
-sessionid = "orcon308n0vkdpo4orjrb6p4m4" # hardcoded for credibility
+sessionid = "%032x" % random.getrandbits(128)
 
 turn_url = "https://www.mousehuntgame.com/api/action/turn/me"
 user_agent = "Mozilla/5.0 (Linux; U; Android 2.3.3; en-en; HTC Desire Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"
