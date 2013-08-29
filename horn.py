@@ -77,18 +77,19 @@ def get_next_delay(time_to_horn):
 		last_small_delay_horns_elapsed += 1
 		return random.randint(delay_min, delay_max) + time_to_horn
 
-if len(sys.argv) < 2:
+if len(sys.argv) > 2:
 	print ""
-	print "You must get an OAuth access token first! Run fblogin.py and check your browser's URL to find it."
-	print "Then, you still need your PHPSESSID for mousehuntgame.com - check your HTTP headers for that."
-	print ""
-	print "USAGE: horn.py [tourney|notourney] [FBConnectAccessToken]"
+	print "USAGE: horn.py [tourney]"
+	print "EXAMPLE: ./horn.py"
 	print "EXAMPLE: ./horn.py tourney"
 	print ""
 	exit(1)
 
 # params handling
-tourney_mode = sys.argv[1] == 'tourney'
+if len(sys.argv) == 2:
+	tourney_mode = sys.argv[1] == 'tourney'
+else:
+	tourney_mode = False
 access_token = get_access_token()
 sessionid = "%032x" % random.getrandbits(128)
 
