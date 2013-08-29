@@ -26,8 +26,6 @@ min_horns_between_small_delay = 4
 last_big_delay_horns_elapsed = 0;
 last_small_delay_horns_elapsed = 0;
 
-tourney_mode = False
-
 def tprint (text):
 	time = datetime.now().strftime("%H:%M:%S")
 	print "[%s] %s" % (time, text)
@@ -63,18 +61,21 @@ def get_next_delay(time_to_horn):
 		last_small_delay_horns_elapsed += 1
 		return random.randint(delay_min, delay_max) + time_to_horn
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
+	print ""
 	print "You must get an OAuth access token first! Run fblogin.py and check your browser's URL to find it."
 	print "Then, you still need your PHPSESSID for mousehuntgame.com - check your HTTP headers for that."
 	print ""
-	print "USAGE: horn.py [PHPSESSID] [FBConnectAccessToken]"
-	print "EXAMPLE: ./horn.py  2edaf334234abc523fgaa444  AQCH-YuVzAi2YhMLLMLfct.....too-long-to-paste........d2fct"
+	print "USAGE: horn.py [tourney|notourney] [PHPSESSID] [FBConnectAccessToken]"
+	print "EXAMPLE: ./horn.py  tourney  2edaf334234abc523fgaa444  AQCH-YuVzAi2YhMLLMLfct.....too-long-to-paste........d2fct"
+	print ""
 	exit(1)
 
+# params handling
+tourney_mode = sys.argv[1] == 'tourney'
+sessionid = sys.argv[2]
+access_token = sys.argv[3]
 
-
-sessionid = sys.argv[1]
-access_token = sys.argv[2]
 turn_url = "https://www.mousehuntgame.com/api/action/turn/me"
 user_agent = "Mozilla/5.0 (Linux; U; Android 2.3.3; en-en; HTC Desire Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"
 
@@ -89,6 +90,11 @@ cmd = """curl -s -d 'v=2&client_id=Cordova%%3AAndroid&client_version=0.11.4&game
 				  """ %s""" % (access_token, sessionid, user_agent, turn_url)
 
 random.seed()
+
+if tourney_mode:
+	print ""
+	print "-- Hunting in tourney mode! --"
+	print ""
 
 while True:
 	response =  os.popen(cmd).read().split("\r\n")
