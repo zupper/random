@@ -6,7 +6,7 @@
 
 import json, random, time, os, sys
 from datetime import datetime
-import urllib, httplib
+import urllib, httplib, webbrowser
 from subprocess import call
 
 # delays min/max values below
@@ -25,6 +25,22 @@ min_horns_between_big_delay = 10
 min_horns_between_small_delay = 4
 last_big_delay_horns_elapsed = 0;
 last_small_delay_horns_elapsed = 0;
+
+def get_access_token():
+	LOGIN_URL = "https://m.facebook.com/login.php?skip_api_login=1&api_key=10337532241&signed_next=1&next=https%3A%2F%2Fm.facebook.com%2Fdialog%2Foauth%3Fredirect_uri%3Dfbconnect%253A%252F%252Fsuccess%26display%3Dtouch%26type%3Duser_agent%26client_id%3D10337532241%26ret%3Dlogin&cancel_uri=fbconnect%3A%2F%2Fsuccess%3Ferror%3Daccess_denied%26error_code%3D200%26error_description%3DPermissions%2Berror%26error_reason%3Duser_denied&display=touch&_rdr"
+	LOCAL_FILE = '.fb_access_token'
+	
+	if not os.path.exists(LOCAL_FILE):
+		print "Logging you in to facebook..."
+		webbrowser.open(LOGIN_URL)
+		ACCESS_TOKEN = raw_input('Access Token: ')
+		open(LOCAL_FILE,'w').write(ACCESS_TOKEN)
+		print "Token saved for future use"
+		print ""
+	else:
+		ACCESS_TOKEN = open(LOCAL_FILE).read()
+	
+	return ACCESS_TOKEN
 
 def tprint (text):
 	time = datetime.now().strftime("%H:%M:%S")
@@ -61,20 +77,20 @@ def get_next_delay(time_to_horn):
 		last_small_delay_horns_elapsed += 1
 		return random.randint(delay_min, delay_max) + time_to_horn
 
-if len(sys.argv) < 4:
+if len(sys.argv) < 2:
 	print ""
 	print "You must get an OAuth access token first! Run fblogin.py and check your browser's URL to find it."
 	print "Then, you still need your PHPSESSID for mousehuntgame.com - check your HTTP headers for that."
 	print ""
-	print "USAGE: horn.py [tourney|notourney] [PHPSESSID] [FBConnectAccessToken]"
-	print "EXAMPLE: ./horn.py  tourney  2edaf334234abc523fgaa444  AQCH-YuVzAi2YhMLLMLfct.....too-long-to-paste........d2fct"
+	print "USAGE: horn.py [tourney|notourney] [FBConnectAccessToken]"
+	print "EXAMPLE: ./horn.py tourney"
 	print ""
 	exit(1)
 
 # params handling
 tourney_mode = sys.argv[1] == 'tourney'
-sessionid = sys.argv[2]
-access_token = sys.argv[3]
+access_token = get_access_token()
+sessionid = "orcon308n0vkdpo4orjrb6p4m4" # hardcoded for credibility
 
 turn_url = "https://www.mousehuntgame.com/api/action/turn/me"
 user_agent = "Mozilla/5.0 (Linux; U; Android 2.3.3; en-en; HTC Desire Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"
