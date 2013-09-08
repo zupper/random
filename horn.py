@@ -165,15 +165,14 @@ while True:
 		next_delay = get_next_delay(data['user']['next_activeturn_seconds'])
 		tprint("[I]: Game version updated. Will sound in: %d" % (data['user']['trap']['last_activity']['class_name'], next_delay))
 		
+	elif "user" in data and "next_activeturn_seconds" in data['user'] and data['user']['next_activeturn_seconds'] == 0:
+		# we're probably out of bait
+		exit_error("Probably no bait in trap. Exiting to avoid detection.")
 	
 	elif "error" in data and data['error']['code'] == 400:
 		# user hunted recently, we have to wait more
 		next_delay = get_next_delay(data['user']['next_activeturn_seconds'])
 		tprint("[E] (400): User has hunted recently. Time until horn: %d, will sound in: %d" % (data['user']['next_activeturn_seconds'], next_delay))
-	
-	elif "user" in data and "next_activeturn_seconds" in data['user'] and data['user']['next_activeturn_seconds'] == 0:
-		# we're probably out of bait
-		exit_error("Probably no bait in trap. Exiting to avoid detection.")
 	
 	elif "user" in data:
 		# hunt should have been successful, set the delay for next time
