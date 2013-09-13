@@ -163,7 +163,7 @@ while True:
 				  """ -H 'Accept-Charset: utf-8, iso-8859-1, utf-16, *;q=0.7'""" \
 				  """ %s""" % (game_version, access_token, sessionid, user_agent, turn_url)
 		next_delay = get_next_delay(data['user']['next_activeturn_seconds'])
-		tprint("[I]: Game version updated. Will sound in: %d" % (data['user']['trap']['last_activity']['class_name'], next_delay))
+		tprint("[I]: Game version updated. Will sound in: %d" % next_delay)
 		
 	elif "user" in data and "next_activeturn_seconds" in data['user'] and data['user']['next_activeturn_seconds'] == 0:
 		# we're probably out of bait
