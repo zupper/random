@@ -5,6 +5,7 @@
 # License: http://www.wtfpl.net/txt/copying/
 
 from settings import Settings
+from mhserverresponse import MHServerResponse
 
 import json, random, time, os, sys
 from datetime import datetime
@@ -106,17 +107,37 @@ class MH:
 
 		while True:
 	
-			response = os.popen(self.cmd).read().split("\r\n")
-			for line in response:
-				if line.startswith("{"):
-					response = line
-			open("debug_response", 'w').write(response)		
-			data = json.loads(response)
+			raw_response = os.popen(self.cmd).read()
+			open("debug_response", 'w').write(raw_response)
+			
+			response = MHServerResponse(raw_response)
 	
-			if "error" in data and data['error']['code'] == 80:
+			if response.status == "error":
+				error_delay = random.randint(50, 100)
+				self.tprint("[E] Server replied wierdly (no JSON). Will retry once. Delay: %d. Raw response:", error_delay)
+				print(raw_response)
+				time.sleep(error_delay)
+				
+				raw_response = os.popen(self.cmd).read().split("\r\n")
+				for line in raw_response:
+					if line.startswith("{"):
+						raw_response = line
+				open("debug_response", 'w').write(raw_response)
+			
+				response = MHServerResponse(raw_response)
+				
+			if response.status == "error":
+				self.tprint("[E] No JSON in reply and already retried. Response:")
+				print(raw_response)
+				self.tprint("[E] Exiting...")
+				exit(1)
+				
+			elif response.status == "update":
 				# game has been updated, we have to change the curl command
+				next_delay = self.get_next_delay(response.data['time_to_horn'])
+				
 				new_version_delay = random.randint(50, 100)
-				self.tprint("[E] (80) Game has been updated, have to get new game version. Sleeping for %s to simulate restarting the app..." % new_version_delay)
+				self.tprint("[E] Game has been updated, have to get new game version. Sleeping for %s to simulate restarting the app..." % new_version_delay)
 				time.sleep(new_version_delay)
 		
 				self.game_version = self.get_game_version()
@@ -129,22 +150,22 @@ class MH:
 						  """ -H 'Accept-Language: en-US'""" \
 						  """ -H 'Accept-Charset: utf-8, iso-8859-1, utf-16, *;q=0.7'""" \
 						  """ %s""" % (game_version, access_token, sessionid, user_agent, turn_url)
-				next_delay = self.get_next_delay(data['user']['next_activeturn_seconds'])
-				self.tprint("[I]: Game version updated. Will sound in: %d" % next_delay)
+				
+				self.tprint("[I] Game version updated. Will sound in: %d" % next_delay)
 		
-			elif "user" in data and "next_activeturn_seconds" in data['user'] and data['user']['next_activeturn_seconds'] == 0:
-				# we're probably out of bait
-				self.exit_error("Probably no bait in trap. Exiting to avoid detection.")
+			elif not response.data['have_bait']:
+				self.exit_error("Out of bait. Exiting to avoid detection...")
+				exit(1)
 	
-			elif "error" in data and data['error']['code'] == 400:
+			elif response.status == "warn":
 				# user hunted recently, we have to wait more
-				next_delay = self.get_next_delay(data['user']['next_activeturn_seconds'])
-				self.tprint("[E] (400): User has hunted recently. Time until horn: %d, will sound in: %d" % (data['user']['next_activeturn_seconds'], next_delay))
+				next_delay = self.get_next_delay(response.data['time_to_horn'])
+				self.tprint("[E] Hunted recently. Status: %s. Time until horn: %d, will sound in: %d" % (response.data['catch']['status'], response.data['time_to_horn'], next_delay))
 	
-			elif "user" in data:
+			elif response.status == "ok":
 				# hunt should have been successful, set the delay for next time
-				next_delay = self.get_next_delay(data['user']['next_activeturn_seconds'])
-				self.tprint("[I]: Horn sounded. Status: %s. Will sound in: %d" % (data['user']['trap']['last_activity']['class_name'], next_delay))
+				next_delay = self.get_next_delay(response.data['time_to_horn'])
+				self.tprint("[I] Horn sounded. Status: %s. Will sound in: %d" % (response.data['catch']['status'], next_delay))
 			else:
 				# we don't know what happened, better stop altogether
 				self.exit_error(response)

@@ -41,12 +41,12 @@ class MHServerResponse:
 		else:
 			response = json.loads(response)
 			
-			if "error" in data:
-				if data['error']['code'] == 400:
+			if "error" in response:
+				if response['error']['code'] == 400:
 					self.status = "warn"
-					self.error = data['error']['message']
-				elif data['error']['code'] == 80:
-					self.status = "warn"
+					self.error = response['error']['message']
+				elif response['error']['code'] == 80:
+					self.status = "update"
 					self.error = "Need game version update"
 			else:
 				self.status = "ok"
