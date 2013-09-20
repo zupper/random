@@ -11,6 +11,8 @@ class Settings:
 	delay_max = 60
 	tourney_delay_min = 1
 	tourney_delay_max = 20
+	keepalive_delay_min = 2700
+	keepalive_delay_max = 4200
 	big_delay_min = 3600
 	big_delay_max = 4800
 	small_delay_min = 450

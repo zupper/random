@@ -137,6 +137,8 @@ class MH:
 		# if we're in tourney, sound quicker than usual and never forget
 		if self.mode == "tourney":
 			return random.randint(Settings.tourney_delay_min, Settings.tourney_delay_max) + time_to_horn
+		elif self.mode == "keepalive":
+			return random.randint(Settings.keepalive_delay_min, Settings.keepalive_delay_max)
 
 		# 5% chance to not sound horn for an hour or more (forgot to sound)
 		if (random.randint(0, 1000) < 50 and self.last_big_delay_horns_elapsed >= 0):
