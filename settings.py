@@ -22,3 +22,7 @@ class Settings:
 	# them consecutively or within a time frame
 	min_horns_between_big_delay = 10
 	min_horns_between_small_delay = 4
+
+	# Set this to use a proxy. Example:
+	#proxy = "http://10.2.4.25:8080"
+	proxy = None

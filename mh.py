@@ -21,6 +21,8 @@ class MH:
 	
 	username = None
 	password = None
+
+	proxies = None
 	
 	# state vars
 	last_big_delay_horns_elapsed = 0;
@@ -77,7 +79,7 @@ class MH:
 			'login_token':		1
 		}
 
-		response = requests.post(login_url, headers=headers, data=params, cookies=cookies)
+		response = requests.post(login_url, headers=headers, data=params, cookies=cookies, proxies=self.proxies)
 		response = json.loads(response.text)
 
 		return response['login_token']
@@ -108,7 +110,7 @@ class MH:
 	def get_game_version(self):
 		self.tprint("[I] Getting game version...")
 		
-		response = requests.post("https://www.mousehuntgame.com/api/info", data={"game_version": "null"})
+		response = requests.post("https://www.mousehuntgame.com/api/info", data={"game_version": "null"}, proxies=self.proxies)
 		session_id = response.cookies["PHPSESSID"]
 
 		response =  response.text.split("\r\n")
@@ -184,7 +186,7 @@ class MH:
 		#turn_url = "http://httpbin.org/post"
 		turn_url = "https://www.mousehuntgame.com/api/action/turn/me"
 		
-		response = requests.post(turn_url, data=params, headers=headers, cookies=cookies)
+		response = requests.post(turn_url, data=params, headers=headers, cookies=cookies, proxies=self.proxies)
 
 		return response.text
 	
@@ -260,6 +262,11 @@ class MH:
 		print ""
 		print "-- Hunting in %s mode! --" % self.mode
 		print ""
+
+		if Settings.proxy is not None:
+			self.proxies = {
+				"https":	Settings.proxy
+			}
 
 		random.seed()
 		
