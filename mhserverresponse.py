@@ -42,7 +42,11 @@ class MHServerResponse:
 			response = json.loads(response)
 			
 			if "error" in response:
-				if response['error']['code'] == 400:
+			
+				if response['error']['code'] == 100:
+					self.status = "login"
+					self.error = response['error']['message']
+				elif response['error']['code'] == 400:
 					self.status = "warn"
 					self.error = response['error']['message']
 				elif response['error']['code'] == 80:
