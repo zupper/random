@@ -190,6 +190,12 @@ class MH:
 
 		return response.text
 	
+	def print_catch(self, data):
+		catch_string = "--- Mouse: %s, Gold: %d, Points: %d" % (data['catch']['mouse'], data['catch']['gold'], data['catch']['points'])
+		if data['catch']['loot'] is not None:
+			catch_string = "%s, Loot: %s" % (catch_string, data['catch']['loot'])
+		self.tprint(catch_string)
+	
 	def loop(self):
 		while True:
 	
@@ -245,11 +251,17 @@ class MH:
 				# user hunted recently, we have to wait more
 				next_delay = self.get_next_delay(response.data['time_to_horn'])
 				self.tprint("[E] Hunted recently. Status: %s. Time until horn: %d, will sound in: %d" % (response.data['catch']['status'], response.data['time_to_horn'], next_delay))
+				
+				if "catchsuccess" in response.data['catch']['status']:
+					self.print_catch(response.data)
 	
 			elif response.status == "ok":
 				# hunt should have been successful, set the delay for next time
 				next_delay = self.get_next_delay(response.data['time_to_horn'])
 				self.tprint("[I] Horn sounded. Status: %s. Will sound in: %d" % (response.data['catch']['status'], next_delay))
+				
+				if "catchsuccess" in response.data['catch']['status']:
+					self.print_catch(response.data)
 			else:
 				# we don't know what happened, better stop altogether
 				self.exit_error(response)
