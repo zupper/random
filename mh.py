@@ -192,7 +192,7 @@ class MH:
 	
 	def print_catch(self, data):
 		catch_string = "--- Mouse: %s, Gold: %d, Points: %d" % (data['catch']['mouse'], data['catch']['gold'], data['catch']['points'])
-		if data['catch']['loot'] is not None:
+		if data['catch']['loot'] is not None and data['catch']['loot'] != "":
 			catch_string = "%s, Loot: %s" % (catch_string, data['catch']['loot'])
 		self.tprint(catch_string)
 	
