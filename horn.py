@@ -5,7 +5,7 @@
 # License: http://www.wtfpl.net/txt/copying/
 
 
-import sys, getopt, getpass
+import sys, getopt
 from mh import MH
 from mhplayer import MHPlayer
 

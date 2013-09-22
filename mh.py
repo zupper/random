@@ -6,10 +6,10 @@
 
 from settings import Settings
 from mhserverresponse import MHServerResponse
-import util
+import util, os
 
 import requests
-import json, random, time, os, sys, getpass
+import json, random, time, getpass
 import webbrowser
 
 class MH:
