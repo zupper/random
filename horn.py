@@ -7,6 +7,7 @@
 
 import sys, getopt, getpass
 from mh import MH
+from mhplayer import MHPlayer
 
 def usage():
 	print ""
@@ -50,8 +51,8 @@ def main(argv):
 	if mode is None:
 		mode = "default"
 
-	game = MH(mode, username)
-	game.loop()
+	player = MHPlayer(mode, username)
+	player.play()
 
 
 if __name__ == "__main__":
