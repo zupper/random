@@ -255,7 +255,12 @@ class MH:
 		response = requests.post(turn_url, data=params, headers=headers, cookies=cookies, proxies=self.proxies)
 
 		return response.text
-			
+	
+	def refresh_game_data(self):
+		self.game_version = self.get_game_version()
+		self.all_bait = self.get_baits()
+		self.all_locations = self.get_locations()
+
 	def __init__(self, mode, username=None):
 
 		self.mode = mode
@@ -273,9 +278,7 @@ class MH:
 		
 		self.check_cache_dir()
 
-		self.game_version = self.get_game_version()
-		self.all_bait = self.get_baits()
-		self.all_locations = self.get_locations()
+		self.refresh_game_data()
 
 		# sleeping for a while to avoid having the two calls performed simultaneously
 		initial_delay = random.randint(5, 20)

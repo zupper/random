@@ -97,7 +97,7 @@ class MHPlayer:
 				util.tprint("[E] Game has been updated, have to get new game version. Sleeping for %s to simulate restarting the app..." % new_version_delay)
 				time.sleep(new_version_delay)
 		
-				self.game_version = self.get_game_version()
+				self.mh.refresh_dame_data()
 				
 				util.tprint("[I] Game version updated. Will sound in: %d" % next_delay)
 		
