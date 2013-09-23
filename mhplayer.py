@@ -56,11 +56,9 @@ class MHPlayer:
 
 	def play(self):
 		while True:
-
-			raw_response = self.mh.hunt()
-			open("debug_response", 'w').write(raw_response)
+			player_data = self.mh.get_player_data()
 			
-			response = MHServerResponse(raw_response)
+			response = self.mh.hunt()
 	
 			if response.status == "error":
 				error_delay = random.randint(50, 100)

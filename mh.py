@@ -26,6 +26,8 @@ class MH:
 	all_locations = None
 	all_bait = None
 
+	all_bait_ids = []
+
 	cache_dir = "%s/.mh" % os.path.dirname(os.path.realpath(__file__))
 	fb_access_token_file = "%s/fb_access_token" % cache_dir
 	mh_access_token_file = "%s/mh_access_token" % cache_dir
@@ -185,6 +187,47 @@ class MH:
 
 		return response
 
+	def get_player_data(self):
+		url = "https://www.mousehuntgame.com/api/get/user/me"
+
+		headers = {
+			'User-Agent':		'Mozilla/5.0 (Linux; U; Android 2.3.3; en-en; HTC Desire Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
+			'Accept':			'application/json, text/javascript, */*; q=0.01',
+			'Content-Type':		'application/x-www-form-urlencoded',
+			'X-Requested-With':	'com.hitgrab.android.mousehunt',
+			'Accept-Encoding': 	'gzip,deflate',
+			'Accept-Language':	'en-US',
+			'Accept-Charset':	'utf-8, iso-8859-1, utf-16, *;q=0.7'
+		}
+		cookies = {
+			'PHPSESSID': self.session_id
+		}
+		params = {
+			'v':				'2',
+			'client_id':		'Cordova%%3AAndroid',
+			'client_version':	'0.12.4',
+			'game_version':		self.game_version,
+		}
+
+		# use the apropriate auth
+		if self.username is not None:
+			params['login_token'] = self.access_token
+		else:
+			params['access_token'] = self.access_token
+
+		response = requests.post(url, headers=headers, data=params, cookies=cookies, proxies=self.proxies)
+		response = json.loads(response.text)
+
+		player_data = {
+			'bait': []
+		}
+
+		for item in response['inventory']:
+			if item['item_id'] in self.all_bait_ids:
+				player_data['bait'].append(item)
+
+		return player_data
+
 	def get_baits(self, refresh=False):
 		util.tprint("[I] Getting baits...")
 
@@ -253,13 +296,21 @@ class MH:
 		turn_url = "https://www.mousehuntgame.com/api/action/turn/me"
 		
 		response = requests.post(turn_url, data=params, headers=headers, cookies=cookies, proxies=self.proxies)
+		raw_response = response.text
 
-		return response.text
+		open("debug_response", 'w').write(raw_response)
+
+		response = MHServerResponse(raw_response)
+
+		return response
 	
 	def refresh_game_data(self):
 		self.game_version = self.get_game_version()
 		self.all_bait = self.get_baits()
 		self.all_locations = self.get_locations()
+
+		for bait in self.all_bait:
+			self.all_bait_ids.append(bait['item_id'])
 
 	def authenticate(self, refresh=False):
 		if self.username is not None:
