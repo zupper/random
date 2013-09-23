@@ -263,7 +263,7 @@ class MH:
 
 	def authenticate(self, refresh=False):
 		if self.username is not None:
-			self.access_token = self.get_login_code(username, refresh)
+			self.access_token = self.get_login_code(self.username, refresh)
 		else:
 			self.access_token = self.get_fb_token(refresh)
 
@@ -289,7 +289,7 @@ class MH:
 		self.refresh_game_data()
 
 		# sleeping for a while to avoid having the two calls performed simultaneously
-		initial_delay = random.randint(5, 20)
+		initial_delay = random.randint(1, 10)
 		util.tprint("[I] Sleeping for %s to avoid having the initial calls too close together." % initial_delay)
 		time.sleep(initial_delay)
 
