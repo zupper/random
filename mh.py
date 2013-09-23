@@ -27,7 +27,7 @@ class MH:
 	all_locations = None
 	all_bait = None
 
-	cache_dir = ".mh"
+	cache_dir = "%s/.mh" % os.path.dirname(os.path.realpath(__file__))
 	fb_access_token_file = "%s/fb_access_token" % cache_dir
 	mh_access_token_file = "%s/mh_access_token" % cache_dir
 	bait_json_file = "%s/bait.json" % cache_dir
@@ -41,6 +41,11 @@ class MH:
 		time = datetime.now().strftime("%H:%M:%S")
 		print "[%s] %s" % (time, text)
 	
+	def check_cache_dir(self):
+		if not os.path.exists(self.cache_dir):
+			# create the directory
+			os.makedirs(self.cache_dir)
+
 	def get_fb_token(self, refresh=False):
 		login_url = "https://m.facebook.com/login.php?skip_api_login=1&api_key=10337532241&signed_next=1&next=https%3A%2F%2Fm.facebook.com%2Fdialog%2Foauth%3Fredirect_uri%3Dfbconnect%253A%252F%252Fsuccess%26display%3Dtouch%26type%3Duser_agent%26client_id%3D10337532241%26ret%3Dlogin&cancel_uri=fbconnect%3A%2F%2Fsuccess%3Ferror%3Daccess_denied%26error_code%3D200%26error_description%3DPermissions%2Berror%26error_reason%3Duser_denied&display=touch&_rdr"
 	
@@ -334,6 +339,7 @@ class MH:
 			time.sleep(next_delay)
 			
 	def __init__(self, mode, username=None):
+
 		self.mode = mode
 		
 		print ""
@@ -347,6 +353,8 @@ class MH:
 
 		random.seed()
 		
+		self.check_cache_dir()
+
 		self.game_version = self.get_game_version()
 		self.all_bait = self.get_baits()
 		self.all_locations = self.get_locations()

@@ -20,6 +20,8 @@ class MHServerResponse:
 	#			|-- gold
 	#			|-- points
 	#			|-- damage
+	#	|-- player
+	#			|-- TBD
 	#
 	# data will be raw response in case of errors
 	
