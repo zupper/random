@@ -84,7 +84,7 @@ class MHPlayer:
 			
 			elif response.status == "login":
 				util.tprint("[E] Session has expired. Reauthenticating...")
-				self.access_token = self.get_access_token(True)		# refreshing the expired access token
+				self.access_token = self.mh.authenticate(True)		# refreshing the expired access token
 				
 				# have a small delay before trying to sound again
 				next_delay = random.randint(1, 10)

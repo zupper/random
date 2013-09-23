@@ -261,6 +261,13 @@ class MH:
 		self.all_bait = self.get_baits()
 		self.all_locations = self.get_locations()
 
+	def authenticate(self, refresh=False):
+		if username is not None:
+			self.username = username
+			self.access_token = self.get_login_code(username, refresh)
+		else:
+			self.access_token = self.get_fb_token(refresh)
+
 	def __init__(self, mode, username=None):
 
 		self.mode = mode
@@ -285,10 +292,6 @@ class MH:
 		util.tprint("[I] Sleeping for %s to avoid having the initial calls too close together." % initial_delay)
 		time.sleep(initial_delay)
 
-		if username is not None:
-			self.username = username
-			self.access_token = self.get_login_code(username)
-		else:
-			self.access_token = self.get_fb_token()
+		self.authenticate()
 		
 		util.tprint("[I] Ready to hunt")
