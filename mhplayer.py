@@ -56,8 +56,6 @@ class MHPlayer:
 
 	def play(self):
 		while True:
-			player_data = self.mh.get_player_data()
-			
 			response = self.mh.hunt()
 	
 			if response.status == "error":
@@ -100,6 +98,8 @@ class MHPlayer:
 				util.tprint("[I] Game version updated. Will sound in: %d" % next_delay)
 		
 			elif not response.data['have_bait']:
+				# we have to make a decision on how to proceed
+				player_data = self.mh.get_player_data()
 				util.exit_error("Out of bait. Exiting to avoid detection...")
 				exit(1)
 	
@@ -121,7 +121,13 @@ class MHPlayer:
 			else:
 				# we don't know what happened, better stop altogether
 				util.exit_error(response)
-		
+			
+			# 30% chance for user to check their journal after hunting
+			if random.randint(0, 1000) < 300:
+				check_delay = random.randint(1, 5)
+				time.sleep(check_delay)
+				player_data = self.mh.get_player_data()
+
 			time.sleep(next_delay)
 
 	def __init__(self, mode, username):
