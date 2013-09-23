@@ -262,8 +262,7 @@ class MH:
 		self.all_locations = self.get_locations()
 
 	def authenticate(self, refresh=False):
-		if username is not None:
-			self.username = username
+		if self.username is not None:
 			self.access_token = self.get_login_code(username, refresh)
 		else:
 			self.access_token = self.get_fb_token(refresh)
@@ -271,6 +270,8 @@ class MH:
 	def __init__(self, mode, username=None):
 
 		self.mode = mode
+		if username is not None:
+			self.username = username
 		
 		print ""
 		print "-- Hunting in %s mode! --" % self.mode
