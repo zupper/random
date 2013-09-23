@@ -131,7 +131,7 @@ class MH:
 		return login_code
 
 	def get_game_version(self):
-		self.tprint("[I] Getting game version...")
+		util.tprint("[I] Getting game version...")
 		
 		headers = {
 			'User-Agent':		'Mozilla/5.0 (Linux; U; Android 2.3.3; en-en; HTC Desire Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
@@ -186,6 +186,8 @@ class MH:
 		return response
 
 	def get_baits(self, refresh=False):
+		util.tprint("[I] Getting baits...")
+
 		items_url = "https://www.mousehuntgame.com/api/get/item/all"
 
 		bait = []
@@ -201,12 +203,14 @@ class MH:
 
 			open(self.bait_json_file, 'w').write(json.dumps(bait))
 		else:
-			raw_json = open(self.bait_json_file, 'w'),read()
+			raw_json = open(self.bait_json_file, 'r').read()
 			bait = json.loads(raw_json)
 
 		return bait
 
 	def get_locations(self, refresh=False):
+		util.tprint("[I] Getting locations...")
+
 		locations_url = "https://www.mousehuntgame.com/api/get/environment/all"
 
 		locations = []
@@ -215,7 +219,7 @@ class MH:
 			locations = self.get_game_data(locations_url)
 			open(self.locaitons_json_file, 'w').write(json.dumps(locations))
 		else:
-			raw_json = open(self.locaitons_json_file, 'w'),read()
+			raw_json = open(self.locaitons_json_file, 'r').read()
 			locations = json.loads(raw_json)
 
 		return locations
@@ -275,12 +279,7 @@ class MH:
 
 		# sleeping for a while to avoid having the two calls performed simultaneously
 		initial_delay = random.randint(5, 20)
-		self.tprint("[I] Sleeping for %s to avoid having the initial calls too close together." % initial_delay)
-		time.sleep(initial_delay)
-
-		# sleeping for a while to avoid having the two calls performed simultaneously
-		initial_delay = random.randint(2, 10)
-		util.tprint("[I] Sleeping for %s to avoid having the two calls too close together." % initial_delay)
+		util.tprint("[I] Sleeping for %s to avoid having the initial calls too close together." % initial_delay)
 		time.sleep(initial_delay)
 
 		if username is not None:
@@ -289,4 +288,4 @@ class MH:
 		else:
 			self.access_token = self.get_fb_token()
 		
-		self.tprint("[I] Ready to hunt")
+		util.tprint("[I] Ready to hunt")
