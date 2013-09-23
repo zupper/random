@@ -5,14 +5,12 @@
 # License: http://www.wtfpl.net/txt/copying/
 
 class MHDecision:
-	delay_time = None
 	new_location = None
 	buy_bait = None
 	new_bait = None
 
 class MHDecide:
 	# state
-	delay_time = None
 	bait_type = None
 	bait_count = None
 	current_location = None
