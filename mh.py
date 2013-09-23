@@ -6,12 +6,11 @@
 
 from settings import Settings
 from mhserverresponse import MHServerResponse
+import util, os
 
 import requests
-import json, random, time, os, sys, getpass
-from datetime import datetime
-import urllib, httplib, webbrowser
-from subprocess import call
+import json, random, time, getpass
+import webbrowser
 
 class MH:
 	game_version = None
@@ -32,14 +31,26 @@ class MH:
 	mh_access_token_file = "%s/mh_access_token" % cache_dir
 	bait_json_file = "%s/bait.json" % cache_dir
 	locaitons_json_file = "%s/locations.json" % cache_dir
-	
-	# state vars
-	last_big_delay_horns_elapsed = 0;
-	last_small_delay_horns_elapsed = 0;
 
-	def tprint (self, text):
-		time = datetime.now().strftime("%H:%M:%S")
-		print "[%s] %s" % (time, text)
+	def get_game_version(self):
+		util.tprint("[I] Getting game version...")
+		
+		response = requests.post("https://www.mousehuntgame.com/api/info", data={"game_version": "null"}, proxies=self.proxies)
+		session_id = response.cookies["PHPSESSID"]
+
+		response =  response.text.split("\r\n")
+		for line in response:
+			if line.startswith("{"):
+				response = line
+		data = json.loads(response)
+	
+		if "game_version" in data:
+			# store the session ID as a by-product
+			self.session_id = session_id
+			return data['game_version']
+		else:
+			print "API responded weirdly: %s" % data
+			return None
 	
 	def check_cache_dir(self):
 		if not os.path.exists(self.cache_dir):
@@ -208,37 +219,6 @@ class MH:
 			locations = json.loads(raw_json)
 
 		return locations
-
-	def exit_error(self, reason):
-		print "Don't know what happened, see the reason below:"
-		print reason
-		self.tprint("Exitting...")
-	
-		exit(1)
-
-	def get_next_delay(self, time_to_horn):
-	
-		# if we're in tourney, sound quicker than usual and never forget
-		if self.mode == "tourney":
-			return random.randint(Settings.tourney_delay_min, Settings.tourney_delay_max) + time_to_horn
-		elif self.mode == "keepalive":
-			return random.randint(Settings.keepalive_delay_min, Settings.keepalive_delay_max)
-
-		# 5% chance to not sound horn for an hour or more (forgot to sound)
-		if (random.randint(0, 1000) < 50 and self.last_big_delay_horns_elapsed >= 0):
-			self.last_big_delay_horns_elapsed = -1 * (Settings.min_horns_between_big_delay);
-			return random.randint(Settings.big_delay_min, Settings.big_delay_max) + time_to_horn
-		
-		# 20% chance to delay horn up to half an hour (delayed sound)
-		elif (random.randint(0, 1000) < 200 and self.last_small_delay_horns_elapsed >= 0):
-			self.last_small_delay_horns_elapsed = -1 * (Settings.min_horns_between_small_delay);
-			return random.randint(Settings.small_delay_min, Settings.small_delay_max) + time_to_horn
-		
-		# by default, sound as usual
-		else:
-			self.last_big_delay_horns_elapsed += 1
-			self.last_small_delay_horns_elapsed += 1
-			return random.randint(Settings.delay_min, Settings.delay_max) + time_to_horn
 	
 	def hunt(self):
 		headers = {
@@ -271,72 +251,6 @@ class MH:
 		response = requests.post(turn_url, data=params, headers=headers, cookies=cookies, proxies=self.proxies)
 
 		return response.text
-	
-	def loop(self):
-		while True:
-	
-			raw_response = self.hunt()
-			open("debug_response", 'w').write(raw_response)
-			
-			response = MHServerResponse(raw_response)
-	
-			if response.status == "error":
-				error_delay = random.randint(50, 100)
-				self.tprint("[E] Server replied wierdly (no JSON). Will retry once. Delay: %d. Raw response:", error_delay)
-				print(raw_response)
-				time.sleep(error_delay)
-				
-				raw_response = os.popen(self.cmd).read().split("\r\n")
-				for line in raw_response:
-					if line.startswith("{"):
-						raw_response = line
-				open("debug_response", 'w').write(raw_response)
-			
-				response = MHServerResponse(raw_response)
-				
-			if response.status == "error":
-				self.tprint("[E] No JSON in reply and already retried. Response:")
-				print(raw_response)
-				self.tprint("[E] Exiting...")
-				exit(1)
-			
-			elif response.status == "login":
-				self.tprint("[E] Session has expired. Reauthenticating...")
-				self.access_token = self.get_fb_token(True)		# refreshing the expired access token
-				
-				# have a small delay before trying to sound again
-				next_delay = random.randint(1, 10)
-				
-			elif response.status == "update":
-				# game has been updated, we have to get the new version
-				next_delay = self.get_next_delay(response.data['time_to_horn'])
-				
-				new_version_delay = random.randint(50, 100)
-				self.tprint("[E] Game has been updated, have to get new game version. Sleeping for %s to simulate restarting the app..." % new_version_delay)
-				time.sleep(new_version_delay)
-		
-				self.game_version = self.get_game_version()
-				
-				self.tprint("[I] Game version updated. Will sound in: %d" % next_delay)
-		
-			elif not response.data['have_bait']:
-				self.exit_error("Out of bait. Exiting to avoid detection...")
-				exit(1)
-	
-			elif response.status == "warn":
-				# user hunted recently, we have to wait more
-				next_delay = self.get_next_delay(response.data['time_to_horn'])
-				self.tprint("[E] Hunted recently. Status: %s. Time until horn: %d, will sound in: %d" % (response.data['catch']['status'], response.data['time_to_horn'], next_delay))
-	
-			elif response.status == "ok":
-				# hunt should have been successful, set the delay for next time
-				next_delay = self.get_next_delay(response.data['time_to_horn'])
-				self.tprint("[I] Horn sounded. Status: %s. Will sound in: %d" % (response.data['catch']['status'], next_delay))
-			else:
-				# we don't know what happened, better stop altogether
-				self.exit_error(response)
-		
-			time.sleep(next_delay)
 			
 	def __init__(self, mode, username=None):
 
@@ -364,6 +278,11 @@ class MH:
 		self.tprint("[I] Sleeping for %s to avoid having the initial calls too close together." % initial_delay)
 		time.sleep(initial_delay)
 
+		# sleeping for a while to avoid having the two calls performed simultaneously
+		initial_delay = random.randint(2, 10)
+		util.tprint("[I] Sleeping for %s to avoid having the two calls too close together." % initial_delay)
+		time.sleep(initial_delay)
+
 		if username is not None:
 			self.username = username
 			self.access_token = self.get_login_code(username)
@@ -371,4 +290,3 @@ class MH:
 			self.access_token = self.get_fb_token()
 		
 		self.tprint("[I] Ready to hunt")
-		
