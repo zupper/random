@@ -222,9 +222,11 @@ class MH:
 			'bait': []
 		}
 
-		for item in response['inventory']:
-			if item['item_id'] in self.all_bait_ids:
-				player_data['bait'].append(item)
+		# it appears that the API doesn't always return the inventory, so check...
+		if "inventory" in response:
+			for item in response['inventory']:
+				if item['item_id'] in self.all_bait_ids:
+					player_data['bait'].append(item)
 
 		return player_data
 
