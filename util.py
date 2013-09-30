@@ -13,6 +13,6 @@ def tprint (text):
 def exit_error(reason):
 	print "Don't know what happened, see the reason below:"
 	print reason
-	self.tprint("Exitting...")
+	tprint("Exitting...")
 
 	exit(1)
