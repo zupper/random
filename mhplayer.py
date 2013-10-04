@@ -60,7 +60,7 @@ class MHPlayer:
 	
 			if response.status == "error":
 				error_delay = random.randint(50, 100)
-				util.tprint("[E] Server replied wierdly (no JSON). Will retry once. Delay: %d. Raw response:", error_delay)
+				util.tprint("[E] Server replied wierdly (no JSON). Will retry once. Delay: %d. Raw response:" % error_delay)
 				print(raw_response)
 				time.sleep(error_delay)
 				
