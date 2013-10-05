@@ -58,7 +58,7 @@ class MHServerResponse:
 				self.status = "ok"
 			
 			if "user" not in response:
-				self.status = "errro"
+				self.status = "error"
 				self.error = "No user object present. Somethign is wrong"
 				self.data = raw_response
 
