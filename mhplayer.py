@@ -65,7 +65,7 @@ class MHPlayer:
 				time.sleep(error_delay)
 				
 				response = self.mh.hunt()
-				open("debug_response", 'w').write(raw_response)
+				open("debug_response", 'w').write(response)
 				
 			if response.status == "error":
 				util.tprint("[E] No JSON in reply and already retried. Response:")
