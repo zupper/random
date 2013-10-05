@@ -61,16 +61,11 @@ class MHPlayer:
 			if response.status == "error":
 				error_delay = random.randint(50, 100)
 				util.tprint("[E] Server replied wierdly (no JSON). Will retry once. Delay: %d. Raw response:" % error_delay)
-				print(raw_response)
+				print(response.data)
 				time.sleep(error_delay)
 				
-				raw_response = os.popen(self.cmd).read().split("\r\n")
-				for line in raw_response:
-					if line.startswith("{"):
-						raw_response = line
+				response = self.mh.hunt()
 				open("debug_response", 'w').write(raw_response)
-			
-				response = MHServerResponse(raw_response)
 				
 			if response.status == "error":
 				util.tprint("[E] No JSON in reply and already retried. Response:")
