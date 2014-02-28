@@ -1,0 +1,10 @@
+.fb_access_token
+.mh/
+.mh_login_code
+debug_response
+mh.pyc
+mhplayer.pyc
+mhserverresponse.pyc
+screenlog.0
+settings.pyc
+util.pyc
